@@ -1,0 +1,542 @@
+#+STARTUP: indent
+* Default font
+#+BEGIN_SRC emacs-lisp
+  (set-default-font "Inconsolata")
+  (set-face-attribute 'default nil
+                      :family "Inconsolata"
+                      :height 120
+                      :weight 'normal
+                      :width 'normal)
+#+END_SRC
+* Find and edit config.org
+#+BEGIN_SRC emacs-lisp
+  (defun config-visit ()
+    (interactive)
+    (find-file "~/.emacs.d/config.org"))
+  (global-set-key (kbd "C-c e") 'config-visit)
+#+END_SRC
+* Reload config.org via init.el
+#+BEGIN_SRC emacs-lisp
+  (defun config-reload ()
+    (interactive)
+    (org-babel-load-file (expand-file-name "~/.emacs.d/config.org")))
+  (global-set-key (kbd "C-c r") 'config-reload)
+#+END_SRC
+* Unclutter Emacs
+#+BEGIN_SRC emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(setq inhibit-startup-message t)
+(setq ring-bell-function 'ignore)
+(when window-system (global-hl-line-mode t))
+#+END_SRC
+* Deactivate Backup and Autosave of Emacs Files
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+#+END_SRC
+* More Entries Kept in Messages Buffer
+#+BEGIN_SRC emacs-lisp
+  (setq message-log-max 10000)
+#+END_SRC
+* Activate Key Help Info in Minibuffer
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :ensure t
+  :init
+  (which-key-mode))
+#+END_SRC
+* Beacon Highlight for better Cursor Visibility
+#+BEGIN_SRC emacs-lisp
+(use-package beacon
+  :ensure t
+  :init
+  (beacon-mode 1))
+#+END_SRC
+* Simplify yes and no answers
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+* Smoother line-by-line Scrolling
+#+BEGIN_SRC emacs-lisp
+  (setq scroll-step            1
+        scroll-conservatively  10000)
+#+END_SRC
+* Single Space Sentence Ending
+#+BEGIN_SRC emacs-lisp
+  (setq sentence-end-double-space nil)
+#+END_SRC
+* Kill Whole Word
+#+BEGIN_SRC emacs-lisp
+  (defun kill-whole-word ()
+    (interactive)
+    (backward-word)
+    (kill-word 1))
+  (global-set-key (kbd "C-c w w") 'kill-whole-word)
+#+END_SRC
+* Pop to mark
+#+BEGIN_SRC emacs-lisp
+  (bind-key "C-x p" 'pop-to-mark-command)
+  (setq set-mark-command-repeat-pop t)
+#+END_SRC
+* Copy a Line
+#+BEGIN_SRC emacs-lisp
+  (defun copy-whole-line ()
+    (interactive)
+    (save-excursion
+      (kill-new
+       (buffer-substring
+        (point-at-bol)
+        (point-at-eol)))))
+  (global-set-key (kbd "C-c w l") 'copy-whole-line)
+#+END_SRC
+* Hungry Delete
+#+BEGIN_SRC emacs-lisp
+  (use-package hungry-delete
+    :ensure t
+    :config (global-hungry-delete-mode))
+#+END_SRC
+* Parentheses
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode 1)
+  (setq show-paren-delay 0)
+#+END_SRC
+** Rainbow delimiters
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :ensure t)
+
+  (set-face-attribute 'rainbow-delimiters-depth-1-face nil
+                      :foreground "#78c5d6")
+  (set-face-attribute 'rainbow-delimiters-depth-2-face nil
+                      :foreground "#bf62a6")
+  (set-face-attribute 'rainbow-delimiters-depth-3-face nil
+                      :foreground "#459ba8")
+  (set-face-attribute 'rainbow-delimiters-depth-4-face nil
+                      :foreground "#e868a2")
+  (set-face-attribute 'rainbow-delimiters-depth-5-face nil
+                      :foreground "#79c267")
+  (set-face-attribute 'rainbow-delimiters-depth-6-face nil
+                      :foreground "#f28c33")
+  (set-face-attribute 'rainbow-delimiters-depth-7-face nil
+                      :foreground "#c5d647")
+  (set-face-attribute 'rainbow-delimiters-depth-8-face nil
+                      :foreground "#f5d63d")
+  (set-face-attribute 'rainbow-delimiters-depth-9-face nil
+                      :foreground "#78c5d6")
+
+  (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                      :foreground 'unspecified
+                      :inherit 'show-paren-mismatch
+                      :strike-through t)
+
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
+#+END_SRC
+** Electric pair mode
+#+BEGIN_SRC emacs-lisp
+  (electric-pair-mode 1)
+#+END_SRC
+* Expand region
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :ensure t
+    )
+
+  (global-set-key (kbd "C-=") 'er/expand-region)
+#+END_SRC
+* sudo edit
+This doesn't work (2018-02-20)
+#+BEGIN_SRC emacs-lisp
+  (use-package sudo-edit
+    :ensure t
+    :bind ("s-e" . sudo-edit))
+#+END_SRC
+* Dired Settings
+#+BEGIN_SRC emacs-lisp
+  (setq dired-dwim-target t)
+#+END_SRC
+** Copy files asynchronously
+#+BEGIN_SRC emacs-lisp
+  (autoload 'dired-async-mode "dired-async.el" nil t)
+  (dired-async-mode 1)
+#+END_SRC
+* IDO
+** Configuration
+#+BEGIN_SRC emacs-lisp
+  (setq ido-enable-flex-matching nil)
+  (setq ido-create-new-buffer 'always)
+  (setq ido-everywhere t)
+  (ido-mode 1)
+#+END_SRC
+** flx-ido
+#+BEGIN_SRC emacs-lisp
+  (use-package flx-ido
+    :ensure t
+    :init
+    (ido-mode 1)
+    (ido-everywhere 1)
+    (flx-ido-mode 1)
+    ;; disable ido faces to see flx highlights.
+    (setq ido-enable-flex-matching t)
+    (setq ido-use-faces nil))
+#+END_SRC
+** IDO Vertical
+#+BEGIN_SRC emacs-lisp
+  (use-package ido-vertical-mode
+    :ensure t
+    :init
+    (ido-vertical-mode 1))
+  (setq ido-vertical-define-keys 'C-n-and-C-p-only)
+#+END_SRC
+** smex for M-x
+#+BEGIN_SRC emacs-lisp
+  (use-package smex
+    :ensure t
+    :init (smex-initialize)
+    :bind
+    ("M-x" . smex))
+#+END_SRC
+* Ivy
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :ensure t
+    :init
+    (ivy-mode 1))
+
+  ; Slim down ivy display
+  (setq ivy-count-format ""
+        ivy-display-style nil
+        ivy-minibuffer-faces nil)
+
+  ; Let ivy use flx for fuzzy-matching
+  ; (require 'flx)
+  ; (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy))
+
+  ; Use Enter on a directory to navigate into the directory, not open it with dired.
+  (define-key ivy-minibuffer-map (kbd "C-m") 'ivy-alt-done)
+
+  ; Let projectile use ivy
+  (setq projectile-completion-system 'ivy)
+#+END_SRC
+* Window and Buffer Handling
+** Workspaces
+#+BEGIN_SRC emacs-lisp
+  (use-package eyebrowse
+    :ensure t
+    :diminish eyebrowse-mode
+    :config (progn
+              (define-key eyebrowse-mode-map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
+              (define-key eyebrowse-mode-map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
+              (define-key eyebrowse-mode-map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
+              (define-key eyebrowse-mode-map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
+              (define-key eyebrowse-mode-map (kbd "M-5") 'eyebrowse-switch-to-window-config-5)
+              (define-key eyebrowse-mode-map (kbd "M-6") 'eyebrowse-switch-to-window-config-6)
+              (define-key eyebrowse-mode-map (kbd "M-7") 'eyebrowse-switch-to-window-config-7)
+              (define-key eyebrowse-mode-map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
+              (define-key eyebrowse-mode-map (kbd "M-9") 'eyebrowse-switch-to-window-config-9)
+              (define-key eyebrowse-mode-map (kbd "M-0") 'eyebrowse-switch-to-window-config-0)
+              (eyebrowse-mode t)
+              (setq eyebrowse-new-workspace t)))
+#+END_SRC
+** Switch Window
+#+BEGIN_SRC emacs-lisp
+  (use-package switch-window
+    :ensure t
+    :config
+    (setq switch-window-input-style 'minibuffer)
+    (setq switch-window-increase 4)
+    (setq switch-window-threshold 2)
+    (setq switch-window-shortcut-style 'qwerty)
+    (setq switch-window-qwerty-shortcuts
+          '("a" "s" "d" "f" "h" "i" "j" "l"))
+    :bind
+    ([remap other-window] . switch-window))
+#+END_SRC
+** Swap buffers
+#+BEGIN_SRC emacs-lisp
+  (load "~/.emacs.d/buffer-move.el")
+#+END_SRC
+** Enable ibuffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x b") 'ibuffer)
+#+END_SRC
+** Switch buffers
+*** Use ido-switch buffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ido-switch-buffer)
+#+END_SRC
+*** Follow newly split window
+#+BEGIN_SRC emacs-lisp
+  (defun split-and-follow-horizontally()
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 2") 'split-and-follow-horizontally)
+
+  (defun split-and-follow-vertically()
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
+#+END_SRC
+** Open help buffer in same buffer
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'display-buffer-alist
+               '("*Help*" display-buffer-same-window))
+#+END_SRC
+** Kill all Buffers
+#+BEGIN_SRC emacs-lisp
+  (defun kill-all-buffers ()
+    (interactive)
+    (mapc 'kill-buffer (buffer-list)))
+  (global-set-key (kbd "C-M-s-k") 'kill-all-buffers)
+#+END_SRC
+* Avy
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :ensure t
+    :bind
+    ("M-s" . avy-goto-char))
+#+END_SRC
+* Company Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :ensure t
+    :init
+    (setq company-tooltip-align-annotations t)
+    (setq company-selection-wrap-around t)
+    (setq company-tooltip-flip-when-above t)
+    (setq company-idle-delay 0.0)
+    (add-hook 'after-init-hook 'global-company-mode))
+
+  (define-key company-active-map [tab] 'company-complete-common-or-cycle)
+  (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+#+END_SRC
+* Elixir
+#+BEGIN_SRC emacs-lisp
+  (use-package elixir-mode
+    :ensure t)
+  (use-package elixir-yasnippets
+    :ensure t)
+  (use-package alchemist
+    :ensure t
+    :diminish alchemist-mode
+    :init
+    (alchemist-mode t))
+#+END_SRC
+* Javascript
+** js2-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package js2-mode
+    :ensure t
+    :config
+    (setq js2-strict-missing-semi-warning nil))
+#+END_SRC
+** jsx
+#+BEGIN_SRC emacs-lisp
+  (use-package rjsx-mode
+    :ensure t)
+#+END_SRC
+* Tramp
+#+BEGIN_SRC emacs-lisp
+  (setq tramp-default-method "ssh"
+        tramp-verbose 2)
+#+END_SRC
+* Dashboard
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-items '((recents . 10)))
+    (setq dashboard-banner-logo-title "Emacs Rocks!"))
+#+END_SRC
+* Window and Buffer Handling
+** Workspaces
+#+BEGIN_SRC emacs-lisp
+  (use-package eyebrowse
+    :ensure t
+    :diminish eyebrowse-mode
+    :config (progn
+              (define-key eyebrowse-mode-map (kbd "M-1") 'eyebrowse-switch-to-window-config-1)
+              (define-key eyebrowse-mode-map (kbd "M-2") 'eyebrowse-switch-to-window-config-2)
+              (define-key eyebrowse-mode-map (kbd "M-3") 'eyebrowse-switch-to-window-config-3)
+              (define-key eyebrowse-mode-map (kbd "M-4") 'eyebrowse-switch-to-window-config-4)
+              (define-key eyebrowse-mode-map (kbd "M-5") 'eyebrowse-switch-to-window-config-5)
+              (define-key eyebrowse-mode-map (kbd "M-6") 'eyebrowse-switch-to-window-config-6)
+              (define-key eyebrowse-mode-map (kbd "M-7") 'eyebrowse-switch-to-window-config-7)
+              (define-key eyebrowse-mode-map (kbd "M-8") 'eyebrowse-switch-to-window-config-8)
+              (define-key eyebrowse-mode-map (kbd "M-9") 'eyebrowse-switch-to-window-config-9)
+              (define-key eyebrowse-mode-map (kbd "M-0") 'eyebrowse-switch-to-window-config-0)
+              (eyebrowse-mode t)
+              (setq eyebrowse-new-workspace t)))
+#+END_SRC
+** Switch Window
+#+BEGIN_SRC emacs-lisp
+  (use-package switch-window
+    :ensure t
+    :config
+    (setq switch-window-input-style 'minibuffer)
+    (setq switch-window-increase 4)
+    (setq switch-window-threshold 2)
+    (setq switch-window-shortcut-style 'qwerty)
+    (setq switch-window-qwerty-shortcuts
+          '("a" "s" "d" "f" "h" "i" "j" "l"))
+    :bind
+    ([remap other-window] . switch-window))
+#+END_SRC
+** Swap buffers
+#+BEGIN_SRC emacs-lisp
+  (load "~/.emacs.d/buffer-move.el")
+#+END_SRC
+** Enable ibuffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x b") 'ibuffer)
+#+END_SRC
+** Switch buffers
+*** Use ido-switch buffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ido-switch-buffer)
+#+END_SRC
+*** Follow newly split window
+#+BEGIN_SRC emacs-lisp
+  (defun split-and-follow-horizontally()
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 2") 'split-and-follow-horizontally)
+
+  (defun split-and-follow-vertically()
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
+#+END_SRC
+** Kill all Buffers
+#+BEGIN_SRC emacs-lisp
+  (defun kill-all-buffers ()
+    (interactive)
+    (mapc 'kill-buffer (buffer-list)))
+  (global-set-key (kbd "C-M-s-k") 'kill-all-buffers)
+#+END_SRC
+
+* Org
+** Configuration
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-files (list "~/Dropbox/org/"))
+  (setq org-todo-keywords
+        (quote ((sequence "NEXT(n)" "TODO(t)" "|" "DONE(d)")
+                (sequence "WAIT(w)" "HOLD(h)" "|" "MEMO(m)" "CANCELLED(c)"))))
+
+#+END_SRC
+** Key Bindings
+#+BEGIN_SRC emacs-lisp
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key "\C-cb" 'org-iswitchb)
+#+END_SRC
+** Org Bullets
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :ensure t
+  :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
+#+END_SRC
+** Open Src Window
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-window-setup 'current-window)
+#+END_SRC
+** Org Snippets
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-structure-template-alist
+               '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"))
+#+END_SRC
+** Open URLs with <enter>
+#+BEGIN_SRC emacs-lisp
+  (setq org-return-follows-link t)
+#+END_SRC
+** Set Waterfox as default browser
+#+BEGIN_SRC emacs-lisp
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "/opt/waterfox/waterfox")
+#+END_SRC
+** Syntax Highlighting in Org mode
+#+BEGIN_SRC emacs-lisp
+  (setq
+   org-src-fontify-natively t
+   org-src-tab-acts-natively t)
+#+END_SRC
+** Tag Column Position
+[2018-03-03 Sat] - Seems not to work
+#+BEGIN_SRC emacs-lisp
+  (setq
+     org-tags-column -90
+     org-agenda-tags-column -90
+     org-habit-graph-column 100
+  )
+#+END_SRC
+* Ledger
+#+BEGIN_SRC emacs-lisp
+  (use-package ledger-mode
+    :ensure t)
+#+END_SRC
+* Markdown
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :ensure t)
+#+END_SRC
+* Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :ensure t
+    :bind
+    ("C-x g" . magit-status))
+#+END_SRC
+* Projectile
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :ensure t
+    :init
+    (projectile-mode 1))
+#+END_SRC
+* Subword Navigation
+#+BEGIN_SRC emacs-lisp
+  (global-subword-mode 1)
+#+END_SRC
+* Modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline
+    :ensure t
+    :config
+    (require 'spaceline-config)
+    (setq powerline-default-separator (quote bar))
+    (spaceline-spacemacs-theme))
+#+END_SRC
+* Diminish Modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :ensure t
+    :init
+    (diminish 'hungry-delete-mode)
+    (diminish 'which-key-mode)
+    (diminish 'beacon-mode)
+    (diminish 'subword-mode)
+    (diminish 'company-mode)
+    (diminish 'org-src-mode)
+    (diminish 'eldoc-mode)
+    (diminish 'rainbow-mode)
+    (diminish 'projectile-mode)
+    (diminish 'org-indent-mode))
+#+END_SRC
+* Auto mode list
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.dat\\'" . ledger-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+#+END_SRC
