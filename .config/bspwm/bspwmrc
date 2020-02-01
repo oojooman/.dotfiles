@@ -1,0 +1,54 @@
+#! /usr/bin/bash
+
+# X Hotkey Daemon
+sxhkd &
+
+# Swap Caps Lock and Ctrl key
+setxkbmap -option caps:ctrl_modifier
+
+# Switch button layout to left-hand mode for internal and external mice
+xinput set-button-map "12" 3 2 1
+xinput set-button-map "14" 3 2 1
+
+# Disable Trackpad
+xinput --disable 11
+
+# Set Wallpaper
+feh --no-startup-id --bg-fill ~/wallpapers/trees-in-fog.jpg
+
+# BSPWM Settings
+# bspc monitor -d  1 2 3 4 5 6 7 8 9 0
+# bspc monitor LVDS-1 -d 6 7 8 9 0
+# bspc monitor DP-1 -d 1 2 3 4 5
+
+bspc config border_width         1
+bspc config window_gap           4
+
+bspc config split_ratio          0.5
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+
+bspc rule -a Emacs state=fullscreen
+# bspc rule -a Gimp desktop='^8' state=floating follow=on
+# bspc rule -a Chromium desktop='^2'
+# bspc rule -a mplayer2 state=floating
+# bspc rule -a Kupfer.py focus=on
+# bspc rule -a Screenkey manage=off
+
+# run the xrandr command if an external monitor is connected to the
+# laptop.  This must be executed before the polybar command, so that
+# polybar can set the two separate bars properly.
+my_laptop_external_monitor=$(xrandr --query | grep 'DP-1')
+if [[ $my_laptop_external_monitor == *"disconnected"* ]]
+then
+    bspc monitor -d 1 2 3 4 5 6 7 8 9 0
+else
+    bspc monitor DP-1 -d 1 2 3 4 5
+    bspc monitor LVDS-1 -d 6 7 8 9 0
+    $HOME/bin/own_script_bspwm_laptop_dual_monitor
+fi
+
+# Autostart Programs
+$HOME/.config/polybar/launch.sh
+emacs --daemon &
+dropbox &
